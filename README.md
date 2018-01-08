@@ -1,22 +1,33 @@
 # wikidump
 `wikidump` is a small package for reading `bz2` compressed Wikipedia dump XML
 files (e.g. `enwiki-latest-pages-articles.xml.bz2` from
-https://dumps.wikimedia.org/enwiki/latest/).
+https://dumps.wikimedia.org/enwiki/latest/):
 
 ```go
+package main
+
 import (
-    "github.com/msrocka/wikidump"
-    "fmt"
+	"fmt"
+
+	"github.com/msrocka/wikidump"
 )
 
 func main() {
-    reader, err := wikidump.NewReader("path/to/dump.xml.bz2")
-    defer reader.Close()
-    check(err)
-    for {
-        page, err := reader.NextPage()
-        check(err)
-        fmt.Println(page.Title)
-    } 
+	dump := "path/to/dump.bz2"
+	reader, err := wikidump.NewReader(dump)
+	if err != nil {
+		panic(err)
+	}
+	defer reader.Close()
+
+	// print all page titles in the wikidump
+	err = reader.Read(func(p *wikidump.Page) bool {
+		fmt.Println(p.Title)
+		return true // return true to continue
+	})
+	if err != nil {
+		panic(err)
+	}
 }
+
 ```
